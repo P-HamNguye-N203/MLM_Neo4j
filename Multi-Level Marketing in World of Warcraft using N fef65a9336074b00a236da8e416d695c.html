@@ -1,0 +1,833 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Multi-Level Marketing in World of Warcraft using Neo4j</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+    margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: rgba(35, 131, 226, .07); }
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-transparentGray { background-color: rgba(227, 226, 224, 0); }
+.select-value-color-translucentGray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="fef65a93-3607-4b00-a236-da8e416d695c" class="page sans"><header><h1 class="page-title"><strong><strong>Multi-Level Marketing in World of Warcraft using Neo4j</strong></strong></h1><p class="page-description"></p></header><div class="page-body"><p id="1e715c64-bb47-40a5-849d-df74ad7da1c4" class="">
+</p><h2 id="31638f1e-d536-4f74-b793-eda0590f7dd7" class=""><strong>Multi-Level Marketing là gì ? </strong></h2><p id="4f21d388-69e7-4b10-add5-a783b8959999" class=""><strong>Multi-Level Marketing</strong> ( Tiếp thị đa cấp ), còn được gọi là <strong>tiếp thị theo mạng </strong>hoặc <strong>bán kim tự tháp</strong> là một chiến lược tiếp thị gây tranh cãi  để bán sản phẩm hoặc dịch vụ trong đó doanh thu của MLM công ty có nguồn gốc từ lực lượng lao động không được trả lương bán sản phẩm hoặc dịch vụ của công ty, trong khi thu nhập của những người tham gia được lấy từ hệ thống hoa hồng thù lao hình kim tự tháp hoặc nhị phân</p><h2 id="53a0ca84-d65d-443f-a8a7-10baf63f23e9" class="">Multi-Level Marketing in World of Warcarft using Neo4j</h2><p id="6af51e81-dd72-4d6e-b05d-1029bce85364" class="">Lập kế hoạch và tính toán bồi thường trong các tổ chức bán hàng phức tạp có thể bị đánh thuế vô cùng lớn đối với các cơ sở dữ liệu truyền thống. Các tổ chức đủ lớn thường sẽ kết thúc việc trộn các quy trình này qua đêm hoặc thành một công việc hàng tuần.<br/><br/>Slashco: the hottest multi-level marketing “guild” in the World of Warcarft.<br/><br/>Trong bang hội này, &quot;associates&quot; có thể tham gia và bán “advanturing gear” tuyệt vời của Slashco cho nhiều người ở Azeroth cũng như tuyển dụng bạn bè và gia đình của họ để bán các sản phẩm Slashco. Khi một “associate” tuyển dụng ai đó tham gia bang hội, thành viên mới đó sẽ trở thành một phần trong &quot;hạ lưu&quot;(down-stream) của “associate” đó. Các “associate” sẽ nhận được một khoản hoa hồng nhỏ cho mỗi mặt hàng được bán bởi các thành viên &quot;down-stream&quot; của họ.<br/><br/>Bán hàng trực tiếp: Đối với mỗi mặt hàng mà một thành viên trong nhóm bán trực tiếp, họ kiếm được hoa hồng.<br/><br/>Tiền bản quyền hạ nguồn: Tỷ lệ phần trăm kiếm được từ giá bán lẻ của các mặt hàng được bán bởi những người &quot;trong hạ lưu của họ&quot;, có nghĩa là những người mà họ đã tuyển dụng để làm việc cho Slashco và mở rộng là những người mà tuyển dụng của họ đã tuyển dụng.<br/><br/>Lợi nhuận bán buôn: Một tỷ lệ phần trăm kiếm được từ hàng hóa được bán cho những người &quot;trong hạ lưu của họ&quot; (những hàng hóa này sau đó sẽ được bán lại cho người tiêu dùng.<br/><br/>Tiền bản quyền bán hàng toàn cầu: Một tỷ lệ phần trăm của tất cả doanh số bán hàng được thực hiện bởi những người trong Slashco (còa là chia sẻ doanh thu).<br/><br/>Mô hình mẫu dựa trên MLM:<br/><br/>- **Direct Sales**: đối với mỗi item mà một thành viên trong nhóm bán trực tiếp, họ kiếm được hoa hồng.<br/>- **Downstream Royalty**: Tỷ lệ phần trăm kiếm được từ gía bán lẻ của các mặt hàng được bán bởi những người “within their down-stream”.<br/>- **Wholesale Profit**: Một tỷ lệ phần trăm kiếm được từ hàng hóa được bán cho những người &quot;within their down-stream&quot; (những hàng hóa này sau đó sẽ được bán lại cho người tiêu dùng.<br/>- **Global Sales Royalty**: Một tỷ lệ phần trăm của tất cả doanh số bán hàng được thực hiện bởi những người trong Slashco (a.k.a chia sẻ doanh thu (revenue sharing)).<br/></p><figure id="4f8bcbad-15c2-41eb-852f-7244cccdbf36" class="image"><a href="images/Untitled.png"><img style="width:1178px" src="images/Untitled.png"/></a></figure><p id="a54bbc20-871c-4db7-a902-298dbae91064" class="">Chúng tôi thấy rằng, tùy thuộc vào cấp độ bạn đang ở, cách bạn được bồi thường cho cả doanh số bán hàng trực tiếp và cả các dòng thu nhập thụ động của bạn có thể khác nhau rất nhiều. Như vậy, việc tính toán bồi thường có thể ít nhất là khó khăn.<br/><br/>Trước khi tải bất kỳ dữ liệu nào vào Neo4j, điều quan trọng là phải biết những câu hỏi nào sẽ quan trọng đối với doanh nghiệp. Trong trường hợp này, mô hình hóa một “sales compensation tool”. Các truy vấn hàng đầu có thể là:<br/><br/>- Hoa hồng do mỗi đại diện (rep), theo thời gian (period), phù hợp với compensation rules<br/>- Hoa hồng do mỗi đại diện (rep), hàng năm phù hợp với các quy tắc bồi thường<br/>- Sales Leaderboard<br/>  - Top Sales Rep by Total Sales<br/>  - Top Sales Rep by Largest Deal<br/>- Global reporting<br/>  - Sales by period<br/>  - Top selling items<br/>- Recommendations<br/>  - Những mặt hàng nào được bán cùng nhau thường xuyên nhất?<br/></p><figure id="4404eadb-52b7-43f3-a9a5-ad5c4c7e5df0" class="image" style="text-align:center"><a href="images/Untitled%201.png"><img style="width:768px" src="images/Untitled%201.png"/></a></figure><p id="56559aa8-341f-44f3-8aec-d607f48cbe8a" class="">
+</p><h2 id="3c38cf77-cc17-421f-afdf-6e06e816bb74" class="">Dữ liệu cho bài toán MLM</h2><p id="12807548-6416-4700-a7ce-7c6e92d43dc1" class="">Các dữ liệu được lưu trong các file `.csv` .</p><ul id="00e5669c-3054-424c-afb8-60ea8a3e2daa" class="bulleted-list"><li style="list-style-type:disc">employees.csv :   employeeID, name, reportsTo.</li></ul><ul id="1f933170-3790-42c3-8024-8c19ccd1b8d2" class="bulleted-list"><li style="list-style-type:disc">item.csv :   item, factor, name, price, wprice, kicker.</li></ul><ul id="519451b9-ca04-466a-8745-c34f1e133b4e" class="bulleted-list"><li style="list-style-type:disc">transactions.csv : transactionID, salesRepID, item1, item2, item3, period.</li></ul><p id="4f4c8cf7-2179-43a6-9639-ec37288ce7d2" class="">
+</p><p id="67cfa08a-fe08-49c1-ab6a-48643d957314" class="">Trước khi nhập dữ liệu, bạn nên chuẩn bị cơ sở dữ liệu bạn muốn sử dụng bằng cách tạo các chỉ mục và ràng buộc.</p><p id="c7f85534-3273-4535-aad7-9ddbf1ea4d27" class=""><br/>Bạn nên đảm bảo rằng các nút `Person`, `Item`, `Transaction`, và `Period` có các thuộc tính id duy nhất bằng cách tạo các ràng buộc đối với chúng.<br/><br/>Tạo một ràng buộc duy nhất cũng ngầm tạo ra một chỉ mục. Bằng cách lập chỉ mục thuộc tính `id`, node lookup (ví dụ: bằng MATCH) sẽ nhanh hơn nhiều.<br/><br/></p><ul id="c2f69d23-d9b2-4d86-a463-79a87a8ec02c" class="bulleted-list"><li style="list-style-type:disc">Bạn tạo một ràng buộc trên thuộc tính <code>employeeID</code> của các nút <code>Person</code> để đảm bảo rằng các nút có nhãn <code>Person</code> sẽ có thuộc tính <code>employeeID</code> duy nhất.</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="fb48be43-03eb-456c-8273-283813588688" class="code"><code class="language-SQL">CREATE CONSTRAINT employeeIDConstraint FOR (p:Person) REQUIRE p.employeeID IS UNIQUE</code></pre><ul id="f3b1d82b-2540-42ec-b14d-a2c4321606d8" class="bulleted-list"><li style="list-style-type:disc">Tạo ràng buộc trên thuộc tính <code>itemID</code> của <code>Item</code> node.</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="549e66d7-7f5c-447e-a5f0-c0916e3fab0b" class="code"><code class="language-SQL">CREATE CONSTRAINT itemIDConstraint FOR (i:Item) REQUIRE i.itemID IS UNIQUE</code></pre><ul id="d2232740-6af2-4304-a1a2-412071166e6f" class="bulleted-list"><li style="list-style-type:disc">Tương tự cho các nút <code>Transaction</code> và <code>Period</code>.</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="44c4fcc3-0885-4eb9-abf4-ce03c1eaf9a8" class="code"><code class="language-SQL">CREATE CONSTRAINT transactionIDConstraint FOR (t:Transaction) REQUIRE t.transactionID IS UNIQUE;
+CREATE CONSTRAINT periodContraint FOR (p:Period) REQUIRE p.period IS UNIQUE;</code></pre><ul id="5b98d781-4c5f-495f-a53d-03a09c5d761f" class="bulleted-list"><li style="list-style-type:disc">Tạo một index trên thuộc tính <code>price</code> của <code>Item</code> node</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="05e98ea6-df71-4662-ac57-c7c6d233eb7a" class="code"><code class="language-SQL">CREATE INDEX FOR (i:Item) ON (i.price);
+CREATE INDEX FOR (i:Item) ON (i.wholesalePrice);</code></pre><ul id="c2607a99-3a3f-453f-8c91-22e8258b0e4c" class="bulleted-list"><li style="list-style-type:disc">Tạo 52 nút <code>Period</code> để biểu diễn 52 tuần trong năm.</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="dab9a9fc-607c-4e9c-b7b9-5eca38e1c27e" class="code"><code class="language-SQL">WITH range(1,52) as periods
+FOREACH (period IN periods |
+	MERGE (p:Period {period:period}))</code></pre><ul id="46fd9a69-a70b-4aff-bce3-5bca594096d8" class="bulleted-list"><li style="list-style-type:disc">Tạo quan hệ <code>NEXT</code> giữa các nút <code>Period</code> để biểu diễn thứ tự tuần trong năm.</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="9d63b73c-300e-43ef-ada5-a0757806234f" class="code"><code class="language-SQL">MATCH (p:Period)
+WITH p
+ORDER BY p.period
+WITH COLLECT(p) as periods
+FOREACH (i in RANGE(0, size(periods)-2) |
+	FOREACH (p1 in [periods[i]] |
+		FOREACH (p2 in [periods[i+1]] |
+			MERGE (p1)-[:NEXT]-&gt;(p2))))</code></pre><ul id="88a96c8f-10b9-4cda-b067-6ae664361d43" class="bulleted-list"><li style="list-style-type:disc">Tải dữ liệu từ các file <code>.csv</code> vào Neo4j. Đồng thời tạo các nút và quan hệ tương ứng.</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="d649cc98-b411-476b-8f16-a00cdc62ebe3" class="code"><code class="language-SQL">LOAD CSV WITH HEADERS FROM &quot;https://raw.githubusercontent.com/P-HamNguye-N203/MLM_Neo4j/main/data/item.csv&quot; as line
+WITH line, toFLOAT(line.price) as price, toInteger(line.item) as itemID, toFLOAT(line.kicker) as kick, toFLOAT(line.wprice) as wholesale
+CREATE (:Item {itemID:itemID, name:line.name, price:price, kicker:kick, wholesalePrice:wholesale});
+//
+LOAD CSV WITH HEADERS FROM &quot;https://raw.githubusercontent.com/P-HamNguye-N203/MLM_Neo4j/main/data/employees.csv&quot; as line
+WITH line, toInteger(line.employeeID) as empID
+CREATE (:Person {employeeID:empID, name:line.name});
+//
+LOAD CSV WITH HEADERS FROM &quot;https://raw.githubusercontent.com/P-HamNguye-N203/MLM_Neo4j/main/data/employees.csv&quot; as line
+WITH line, toInteger(line.employeeID) as empID, toInteger(line.reportsTo) as reportsToID
+MATCH (sub:Person {employeeID:empID}), (boss:Person {employeeID:reportsToID})
+MERGE (sub)-[:REPORTS_TO]-&gt;(boss);
+//
+LOAD CSV WITH HEADERS FROM &quot;https://raw.githubusercontent.com/P-HamNguye-N203/MLM_Neo4j/main/data/transactions.csv&quot; as line
+WITH line, toInteger(line.transactionID) as transID
+CREATE (:Transaction {transactionID:transID});
+//
+LOAD CSV WITH HEADERS FROM &quot;https://raw.githubusercontent.com/P-HamNguye-N203/MLM_Neo4j/main/data/transactions.csv&quot; as line
+WITH line, toInteger(line.transactionID) as transID, toInteger(line.period) as period
+MATCH (t:Transaction {transactionID:transID}), (p:Period {period:period})
+CREATE (t)-[:OCCURRED_IN]-&gt;(p);
+//
+LOAD CSV WITH HEADERS FROM &quot;https://raw.githubusercontent.com/P-HamNguye-N203/MLM_Neo4j/main/data/transactions.csv&quot; as line
+WITH line,
+toInteger(line.transactionID) as transID,
+toInteger(line.item1) as itemID1,
+toInteger(line.item2) as itemID2,
+toInteger(line.item3) as itemID3
+MATCH
+(tx:Transaction {transactionID:transID}),
+(i1:Item {itemID:itemID1}),
+(i2:Item {itemID:itemID2}),
+(i3:Item {itemID:itemID3})
+CREATE
+(tx)-[:CONTAINS]-&gt;(i1),
+(tx)-[:CONTAINS]-&gt;(i2),
+(tx)-[:CONTAINS]-&gt;(i3);
+//
+LOAD CSV WITH HEADERS FROM &quot;https://raw.githubusercontent.com/P-HamNguye-N203/MLM_Neo4j/main/data/transactions.csv&quot; as line
+WITH line,
+toInteger(line.transactionID) as transID,
+toInteger(line.salesRepID) as repID
+MATCH (rep:Person {employeeID:repID}),
+(tx:Transaction {transactionID:transID})
+CREATE
+(rep)-[:SOLD]-&gt;(tx);</code></pre><ul id="fdb2a1b8-3dbe-4a92-8d82-1cce20d73f07" class="bulleted-list"><li style="list-style-type:disc">Tạo level cho các cộng tác viên, dựa trên số lượng cấp dưới mà họ có.</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="45818540-4bf5-4e56-a884-7003afb05b8c" class="code"><code class="language-SQL">MATCH (target:Person)&lt;-[r:REPORTS_TO*..]-(e)
+WITH target, count(e) as totalReports
+SET target.reportsCount = totalReports
+WITH target,
+//setting the right &quot;level&quot; based on number of reports
+CASE
+WHEN target.reportsCount &gt; 124
+THEN 6
+WHEN target.reportsCount &lt; 124 and target.reportsCount &gt;= 75
+THEN 5
+WHEN target.reportsCount &lt; 75 and target.reportsCount &gt;= 25
+THEN 4
+WHEN target.reportsCount &lt; 25 and target.reportsCount &gt;= 10
+THEN 3
+WHEN target.reportsCount &lt; 10 and target.reportsCount &gt;= 2
+THEN 2
+ELSE 1
+END AS levels
+SET target.level = levels;</code></pre><p id="fe0f3fbf-b726-49d0-9bb3-3a3b4c0d4270" class="">
+</p><h2 id="15a8fdc7-e644-45e8-b9a0-ca453d67d665" class="">Sau khi thực hiện chạy cypher trên Neo4j </h2><figure id="b8691804-53a2-4135-b17c-237a4efba803" class="image"><a href="images/Untitled%202.png"><img style="width:1918px" src="images/Untitled%202.png"/></a></figure><p id="df159a7f-7b85-427d-ae33-24a8eb7408c7" class="">
+</p><h2 id="1e449226-52d8-4891-8527-c60fce9628d9" class="">Các truy vấn đơn giản </h2><p id="77f45731-8e79-4914-9bd4-c9e431db4896" class="">
+</p><h3 id="d01f08db-fdc2-4884-bf5d-70bd4e7812c6" class=""><strong>1. Recommendation</strong></h3><ul id="06880751-b655-477b-bedf-c1636d5e55db" class="bulleted-list"><li style="list-style-type:disc">Những mặt hàng nào được bán cùng nhau thường xuyên nhất?</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="48af7e3c-b688-457b-9b2b-f1d20bcbbcf9" class="code"><code class="language-SQL">MATCH path = (item:Item)-[:CONTAINS]-(:Transaction)-[:CONTAINS]-(item2:Item)
+WHERE id(item) &gt; id(item2)
+WITH item, item2, count(distinct path) as instances
+ORDER BY instances DESC
+LIMIT 3
+RETURN item.name, item2.name, instances;</code></pre><figure id="fd4ea933-733c-405f-9f5c-bdf334a09170" class="image"><a href="images/Untitled%203.png"><img style="width:1321px" src="images/Untitled%203.png"/></a></figure><h3 id="5e3dcdcb-42e5-400a-9d64-8a836aab7112" class=""><strong>2. Global reporting</strong></h3><ul id="6f93d784-3963-44fd-bfb8-9e1defd371b8" class="bulleted-list"><li style="list-style-type:disc">Doanh số bán hàng theo kỳ</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="4ff7528f-9fff-4d6e-9a05-0a33883d7781" class="code"><code class="language-SQL">//total sales volume by period descending
+MATCH (p:Period)-[:OCCURRED_IN]-(t:Transaction)-[:CONTAINS]-(i:Item)
+WITH sum(i.price) as sales, p
+ORDER BY sales DESC
+LIMIT 10
+RETURN sales, p.period;</code></pre><figure id="f76dd6a3-313f-4f69-8a3f-dcf972321c92" class="image"><a href="images/Untitled%204.png"><img style="width:1315px" src="images/Untitled%204.png"/></a></figure><p id="6d425936-6c0b-4bee-9872-9635462fe3e2" class="">
+</p><ul id="74cb101c-5aa8-4153-a9fd-873e0779905c" class="bulleted-list"><li style="list-style-type:disc">Các mặt hàng bán chạy nhất</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="811bf30a-bcc1-443a-bf30-e4b40e6926fb" class="code"><code class="language-SQL">MATCH (t:Transaction)-[:CONTAINS]-(i:Item)
+WITH count(distinct(t)) as itemSales, i
+ORDER BY itemSales DESC
+LIMIT 5
+RETURN i.name as name, itemSales as count;</code></pre><figure id="7f2895d8-002b-4d23-8374-29ff9b4d98d7" class="image"><a href="images/Untitled%205.png"><img style="width:708px" src="images/Untitled%205.png"/></a></figure><p id="f8377a19-d82a-4fe8-8b4c-078441a841ab" class="">
+</p><h3 id="efc8529c-a568-4d62-9a9e-b91fec90bc4d" class=""><strong>3. Sales Leaderboad</strong></h3><ul id="2dd8b5e3-e41d-4868-9ab4-5698d2382950" class="bulleted-list"><li style="list-style-type:disc">Đại diện bán hàng hàng đầu theo tổng khối lượng bán hàng</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="d16eeea4-7071-4057-ae7f-a1569f6f4013" class="code"><code class="language-SQL">//Ai đã bán được nhiều nhất?
+MATCH (rep)-[:SOLD]-(txn)-[:CONTAINS]-(itm)
+WITH rep, round(sum(itm.price)) as volume
+ORDER BY volume DESC
+LIMIT 5
+RETURN rep.name as name, volume;</code></pre><figure id="aed7081c-dd9a-451e-8681-ae84051fade3" class="image"><a href="images/Untitled%206.png"><img style="width:1345px" src="images/Untitled%206.png"/></a></figure><p id="393e7148-5ca2-4ba0-b790-4fccd778fd7d" class="">
+</p><ul id="c7bcdcbb-22f1-4d58-9b94-01fa123f9b67" class="bulleted-list"><li style="list-style-type:disc">Ai đã chốt giao dịch lớn nhất?</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="1ad2878f-2f18-4441-9c4a-766800fde67e" class="code"><code class="language-SQL">//level 1 comp
+MATCH (distributor:Person {level:1})-[:SOLD]-(transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.25) as tc1, distributor.name as n1
+RETURN tc1, n1;
+//level 2 comp
+MATCH (success_builder:Person {level:2})&lt;-[r:REPORTS_TO*..]-(downStreamers)-[:SOLD]-(transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.05) as downStream2, success_builder
+MATCH (success_builder)-[:SOLD]-(transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.25) + downStream2 as tc2, success_builder.name as n2, downStream2
+RETURN tc2, n2;
+//level 3 comp
+MATCH (senior_mage:Person {level:3})&lt;-[r:REPORTS_TO*..]-(downStreamers)-[:SOLD]-(transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.05)+sum(item.wholesalePrice*.25) as downStream3, senior_mage
+MATCH (senior_mage)-[:SOLD]-(transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.5) + downStream3 as tc3, senior_mage.name as n3, downStream3
+RETURN tc3, n3;
+//level 4 comp
+MATCH (transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.01) as globalRoyalty
+MATCH (guild_leader:Person {level:4})&lt;-[r:REPORTS_TO*..]-(downStreamers)-[:SOLD]-(transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.07)+sum(item.wholesalePrice*.3) + globalRoyalty as downStreamGlobal4, guild_leader, globalRoyalty
+MATCH (guild_leader)-[:SOLD]-(transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.5) + downStreamGlobal4 as tc4, guild_leader.name as n4, downStreamGlobal4
+RETURN tc4, n4;
+//level 5 comp
+MATCH (transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.02) as globalRoyalty
+MATCH (boss:Person {level:5})&lt;-[r:REPORTS_TO*..]-(downStreamers)-[:SOLD]-(transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.07)+sum(item.wholesalePrice*.3) + globalRoyalty as downStreamGlobal5, boss, globalRoyalty
+MATCH (boss)-[:SOLD]-(transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.5) + downStreamGlobal5 as tc5, boss.name as n5, downStreamGlobal5
+RETURN tc5, n5;
+//level 6 comp
+MATCH (transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.05) as globalRoyalty
+MATCH (big_boss:Person {level:6})&lt;-[r:REPORTS_TO*..]-(downStreamers)-[:SOLD]-(transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.1)+sum(item.wholesalePrice*.5) + globalRoyalty as downStreamGlobal6, big_boss, globalRoyalty
+MATCH (boss)-[:SOLD]-(transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.65) + downStreamGlobal6 as tc6, big_boss.name as n6, downStreamGlobal6
+RETURN tc6, n6;</code></pre><figure id="bc2702ab-0e3d-430f-a580-4fdafb8432c6" class="image"><a href="images/Untitled%207.png"><img style="width:1341px" src="images/Untitled%207.png"/></a><figcaption>LV1</figcaption></figure><figure id="55d495c9-a9ef-40a7-b5ef-94066cf6a0f6" class="image"><a href="images/Untitled%208.png"><img style="width:1315px" src="images/Untitled%208.png"/></a><figcaption>LV2</figcaption></figure><figure id="556f8fea-3b26-406d-a816-31c7d580a5ca" class="image"><a href="images/Untitled%209.png"><img style="width:708px" src="images/Untitled%209.png"/></a><figcaption>LV 3</figcaption></figure><figure id="584070ad-e92b-4d79-a95f-b5d88fcfd316" class="image"><a href="images/Untitled%2010.png"><img style="width:1338px" src="images/Untitled%2010.png"/></a><figcaption>LV 4</figcaption></figure><figure id="945da7c6-4485-4299-80f6-7742fefe4eca" class="image"><a href="images/Untitled%2011.png"><img style="width:708px" src="images/Untitled%2011.png"/></a><figcaption>LV 5</figcaption></figure><figure id="3732dcbc-ccbb-4fe2-b158-9fa1ea8da4a5" class="image"><a href="images/Untitled%2012.png"><img style="width:708px" src="images/Untitled%2012.png"/></a><figcaption>LV 6</figcaption></figure><p id="f528707a-65c7-45bf-9a05-7f89400fb044" class="">
+</p><h3 id="bff44ab5-a277-485f-b09b-e9b152974608" class=""><strong>5. Commission due to each rep, by period in accord with compensation rules</strong></h3><p id="6f0e831a-20c6-4839-9dcc-79f7d495a273" class="">Hoa hồng do mỗi đại diện, theo khoảng thời gian phù hợp với các quy tắc bồi thường</p><ul id="98482167-5218-45f5-8b40-d6b3fa5234e4" class="bulleted-list"><li style="list-style-type:disc">Ví dụ cho đại diện cấp 6</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="984fd37a-b1e8-4633-bb09-0b3fad50fa0f" class="code"><code class="language-SQL">//level 6 comp with time period
+MATCH (transaction)-[:OCCURRED_IN]-(p:Period {period:35})
+WITH transaction, p
+MATCH (transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.05) as globalRoyalty, p
+MATCH (transaction)-[:OCCURRED_IN]-(p:Period {period:35})
+WITH globalRoyalty, p, transaction
+MATCH (big_boss:Person {level:6})&lt;-[r:REPORTS_TO*..]-(downStreamers)-[:SOLD]-(transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.1)+sum(item.wholesalePrice*.5) + globalRoyalty as downStreamGlobal6, big_boss, p, globalRoyalty
+MATCH (transaction)-[:OCCURRED_IN]-(p:Period {period:35})
+WITH transaction, downStreamGlobal6, big_boss
+MATCH (boss)-[:SOLD]-(transaction)-[:CONTAINS]-(item)
+WITH sum(item.price*.65) + downStreamGlobal6 as tc6, big_boss.name as n6, downStreamGlobal6
+RETURN tc6, n6;</code></pre><figure id="19a85447-9e4d-4951-8a4e-623561922009" class="image"><a href="images/Untitled%2013.png"><img style="width:1320px" src="images/Untitled%2013.png"/></a></figure><p id="6d74fb34-13f9-4c67-9e0e-a0e64696ae66" class="">
+</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
